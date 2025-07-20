@@ -6,7 +6,378 @@
     <title>NeuralChat AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos existentes */
+        :root {
+            --primary-color: #6c5ce7;
+            --primary-light: #8c7bf7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --dark-color: #2d3436;
+            --light-color: #ffffff;
+            --gray-color: #f5f6fa;
+            --message-user: #6c5ce7;
+            --message-ai: #f5f6fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 85vh;
+            background-color: var(--light-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 20px;
+        }
+
+        .chat-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chat-subtitle {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--dark-color);
+            background-color: transparent;
+            border: none;
+        }
+
+        .control-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--light-color);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 12px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--light-color);
+        }
+
+        .ai-avatar {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: var(--light-color);
+        }
+
+        .message-content {
+            padding: 15px 20px;
+            border-radius: 18px;
+            position: relative;
+            max-width: calc(100% - 64px);
+            line-height: 1.5;
+        }
+
+        .user-message .message-content {
+            background-color: var(--message-user);
+            color: var(--light-color);
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 5px rgba(108, 92, 231, 0.2);
+        }
+
+        .ai-message .message-content {
+            background-color: var(--message-ai);
+            color: var(--dark-color);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+            align-self: flex-end;
+        }
+
+        .user-message .timestamp {
+            color: var(--light-color);
+        }
+
+        .ai-message .timestamp {
+            color: var(--dark-color);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background-color: var(--light-color);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            background-color: var(--gray-color);
+            border-radius: 30px;
+            padding: 5px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+        }
+
+        .chat-action-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: #7f8c8d;
+            transition: all 0.2s;
+        }
+
+        .chat-action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            background-color: transparent;
+        }
+
+        .send-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--dark-color);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: typingBounce 1.5s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-chip {
+            background-color: var(--gray-color);
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .suggestion-chip:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-logo {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .chat-title h1 {
+                font-size: 1.2rem;
+            }
+
+            .suggestion-chip {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --light-color: #2d3436;
+                --dark-color: #f5f6fa;
+                --gray-color: #3d3d3d;
+                --message-user: #6c5ce7;
+                --message-ai: #3d3d3d;
+            }
+
+            .chat-input-wrapper {
+                background-color: #3d3d3d;
+            }
+
+            .chat-subtitle {
+                color: #bdc3c7;
+            }
+        }
     </style>
 </head>
 <body>
@@ -25,6 +396,9 @@
                 <button class="control-btn" title="Borrar conversación">
                     <i class="fas fa-trash-alt"></i>
                 </button>
+                <button class="control-btn" title="Configuración">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </div>
 
@@ -41,117 +415,886 @@
         </div>
 
         <div class="chat-input-container">
+            <div class="suggestions">
+                <div class="suggestion-chip">¿Qué puedes hacer?</div>
+                <div class="suggestion-chip">Escribe un poema</div>
+                <div class="suggestion-chip">Cuéntame un dato curioso</div>
+            </div>
+
             <div class="chat-input-wrapper">
+                <button class="chat-action-btn" title="Adjuntar archivo">
+                    <i class="fas fa-paperclip"></i>
+                </button>
                 <input type="text" class="chat-input" id="user-input" placeholder="Escribe tu mensaje..." />
+                <button class="chat-action-btn" title="Micrófono">
+                    <i class="fas fa-microphone"></i>
+                </button>
                 <button class="send-btn" id="send-button">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div>
     </div>
-
-    <script>
+    <scrip>
         document.addEventListener('DOMContentLoaded', function() {
-            const chatMessages = document.getElementById('chat-messages');
-            const userInput = document.getElementById('user-input');
-            const sendButton = document.getElementById('send-button');
-
-            // Ejemplo de horarios en formato JSON
-            const horarios = {
-                "Lunes": [
-                    { "hora": "09:00", "materia": "Matemáticas" },
-                    { "hora": "10:00", "materia": "Historia" }
-                ],
-                "Martes": [
-                    { "hora": "09:00", "materia": "Ciencias" },
-                    { "hora": "11:00", "materia": "Inglés" }
-                ]
-            };
-
-            let conversationHistory = [];
-
-            function getCurrentTime() {
-                const now = new Date();
-                return now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
-            }
-
-            function addMessage(content, isUser = false) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-
-                const avatarDiv = document.createElement('div');
-                avatarDiv.className = `avatar ${isUser ? 'user-avatar' : 'ai-avatar'}`;
-
-                const avatarIcon = document.createElement('i');
-                avatarIcon.className = isUser ? 'fas fa-user' : 'fas fa-robot';
-                avatarDiv.appendChild(avatarIcon);
-
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-
-                const paragraph = document.createElement('p');
-                paragraph.textContent = content;
-                contentDiv.appendChild(paragraph);
-
-                const timestamp = document.createElement('div');
-                timestamp.className = 'timestamp';
-                timestamp.textContent = getCurrentTime();
-                contentDiv.appendChild(timestamp);
-
-                messageDiv.appendChild(avatarDiv);
-                messageDiv.appendChild(contentDiv);
-
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-
-            function handleUserInput() {
-                const userMessage = userInput.value.trim().toLowerCase();
-
-                if (userMessage === '') return;
-
-                addMessage(userMessage, true);
-                userInput.value = '';
-
-                // Procesar la pregunta para buscar horarios
-                const match = userMessage.match(/(clase|materia|horario).*?(\d{2}:\d{2})/);
-                if (match) {
-                    const time = match[2];
-                    const dayMatch = userMessage.match(/lunes|martes|miércoles|jueves|viernes/i);
-                    const day = dayMatch ? dayMatch[0].charAt(0).toUpperCase() + dayMatch[0].slice(1) : null;
-
-                    if (day && horarios[day]) {
-                        const classAtTime = horarios[day].find(item => item.hora === time);
-                        if (classAtTime) {
-                            addMessage(`El ${day} a las ${time} tienes: ${classAtTime.materia}.`, false);
-                        } else {
-                            addMessage(`No hay clases programadas a las ${time} el ${day}.`, false);
-                        }
-                    } else {
-                        addMessage("Por favor, especifica un día válido (lunes, martes, etc.).", false);
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const suggestions = document.querySelectorAll('.suggestion-chip');
+    
+const horarios = {
+                "10 BCH": {
+                    "Lunes": {
+                        "7:00-7:45": ["Religion"],
+                        "7:45-8:30": ["Ingles"],
+                        "8:30-9:15": ["Fisica"],
+                        "9:15-10:00": ["Psicologia"],
+                        "10:30-11:15": ["Biologia"],
+                        "11:15-12:00": ["Sociologia"],
+                        "12:00-12:45": ["Matematicas"],
+                        "12:45-1:30": ["Quimica"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Español"],
+                        "7:45-8:30": ["Informatica"],
+                        "8:30-9:15": ["Ingles"],
+                        "9:15-10:00": ["H.Honduras"],
+                        "10:30-11:15": ["Quimica"],
+                        "11:15-12:00": ["Biologia"],
+                        "12:00-12:45": ["Fisica"],
+                        "12:45-1:30": ["Matematica"]
+                    },
+                    "Miercoles": {
+                        "7:00-7:45": ["Biologia"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Matematica"],
+                        "9:15-10:00": ["Quimica"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Fisica"],
+                        "12:00-12:45": ["Religion"],
+                        "12:45-1:30": ["Informatica"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["Quimica"],
+                        "7:45-8:30": ["Fisica"],
+                        "8:30-9:15": ["Sociologia"],
+                        "9:15-10:00": ["Matematica"],
+                        "10:30-11:15": ["Informatica"],
+                        "11:15-12:00": ["Ed.Fisica"],
+                        "12:00-12:45": ["Español"],
+                        "12:45-1:30": ["Ingles"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Quimica"],
+                        "7:45-8:30": ["Psicologia"],
+                        "8:30-9:15": ["Informatica"],
+                        "9:15-10:00": ["Biologia"],
+                        "10:30-11:15": ["Fisica"],
+                        "11:15-12:00": ["H.Honduras"],
+                        "12:00-12:45": ["Español"],
+                        "12:45-1:30": ["Matematicas"]
                     }
-                } else {
-                    addMessage("Lo siento, no entendí tu pregunta. Por favor, pregúntame sobre los horarios de una clase específica.", false);
+                },
+                "11 BCH": {
+                    "Lunes": {
+                        "7:00-7:45": ["Apreciacion A."],
+                        "7:45-8:30": ["Apreciacion A."],
+                        "8:30-9:15": ["Quimica"],
+                        "9:15-10:00": ["progra y TIC"],
+                        "10:30-11:15": ["Antropologia"],
+                        "11:15-12:00": ["Bilogia II"],
+                        "12:00-12:45": ["Fisica II"],
+                        "12:45-1:30": ["Español"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Economia"],
+                        "7:45-8:30": ["Fisica"],
+                        "8:30-9:15": ["His. Univer."],
+                        "9:15-10:00": ["Ingles II"],
+                        "10:30-11:15": ["Matematica"],
+                        "11:15-12:00": ["Bilogia II"],
+                        "12:00-12:45": ["Español"],
+                        "12:45-1:30": ["Quimica"]
+                    },
+                    "Miercoles": {
+                        "7:00-7:45": ["His. Univer.-"],
+                        "7:45-8:30": ["Matematica"],
+                        "8:30-9:15": ["Antropologia"],
+                        "9:15-10:00": ["Religion"],
+                        "10:30-11:15": ["Español"],
+                        "11:15-12:00": ["Filosofia"],
+                        "12:00-12:45": ["Bilogia II"],
+                        "12:45-1:30": ["Quimica"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["Matematica"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Economia"],
+                        "9:15-10:00": ["Bilogia II"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Quimica"],
+                        "12:00-12:45": ["Ingles II"],
+                        "12:45-1:30": ["Fisica II"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Matematica"],
+                        "7:45-8:30": ["Fisica II"],
+                        "8:30-9:15": ["His. Univer."],
+                        "9:15-10:00": ["progra y TIC"],
+                        "10:30-11:15": ["Filosofia"],
+                        "11:15-12:00": ["Ingles II"],
+                        "12:00-12:45": ["Religion"],
+                        "12:45-1:30": [""]
+                    }
+                },
+                "10 AEB A": {
+                    "Lunes": {
+                        "7:00-7:45": ["Sociologia"],
+                        "7:45-8:30": ["Religiön"],
+                        "8:30-9:15": ["Quimica"],
+                        "9:15-10:00": ["Matemåtic"],
+                        "10:30-11:15": ["Fisica"],
+                        "11:15-12:00": ["English"],
+                        "12:00-12:45": ["Informatica"],
+                        "12:45-1:30": ["Biologia 1"],
+                        "1:45-2:30": ["PsicOlOgia"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Matematica"],
+                        "7:45-8:30": ["English"],
+                        "8:30-9:15": ["English"],
+                        "9:15-10:00": ["Biologia"],
+                        "10:30-11:15": ["Quimica 1"],
+                        "11:15-12:00": ["paiol 1"],
+                        "12:00-12:45": ["Emprend. Serv. Client"],
+                        "12:45-1:30": ["Language 1"],
+                        "1:45-2:30": ["Keyboard 1"]
+                    },
+                    "Miercoles": {
+                        "7:00-7:45": ["Fisica"],
+                        "7:45-8:30": ["Language"],
+                        "8:30-9:15": ["English"],
+                        "9:15-10:00": ["t. de Honduras"],
+                        "10:30-11:15": ["TUTORiA"],
+                        "11:15-12:00": ["religiön"],
+                        "12:00-12:45": ["Espanol 1"],
+                        "12:45-1:30": ["Matemåtie 1"],
+                        "1:45-2:30": ["Educ. Fisica"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["Fisica"],
+                        "7:45-8:30": ["Language"],
+                        "8:30-9:15": ["English"],
+                        "9:15-10:00": ["Espaüol"],
+                        "10:30-11:15": ["Quimica 1"],
+                        "11:15-12:00": ["Informatica"],
+                        "12:00-12:45": ["Matemåtic 1"],
+                        "12:45-1:30": ["Keyboard 1"],
+                        "1:45-2:30": ["Emprend. Serv. Client"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Hist. de Honduras"],
+                        "7:45-8:30": ["Language"],
+                        "8:30-9:15": ["English"],
+                        "9:15-10:00": ["Sociologia"],
+                        "10:30-11:15": ["Espanol"],
+                        "11:15-12:00": ["Fisica"],
+                        "12:00-12:45": ["Quimica 1"],
+                        "12:45-1:30": ["Psieologia"],
+                        "1:45-2:30": ["Biologia"]
+                    }
+                },
+                "10 AEB B": {
+                    "Lunes": {
+                        "7:00-7:45": ["Emprendimiento"],
+                        "7:45-8:30": ["Biologia"],
+                        "8:30-9:15": ["Informatica"],
+                        "9:15-10:00": ["Fisica"],
+                        "10:30-11:15": ["Ingles"],
+                        "11:15-12:00": ["Psicologia"],
+                        "12:00-12:45": ["Español"],
+                        "12:45-1:30": ["Keyboarding"],
+                        "1:45-2:30": ["Quimica"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Quimica"],
+                        "7:45-8:30": ["matematica"],
+                        "8:30-9:15": ["Ingles"],
+                        "9:15-10:00": ["Religion"],
+                        "10:30-11:15": ["Fisica"],
+                        "11:15-12:00": ["Sociologia"],
+                        "12:00-12:45": ["Biologia"],
+                        "12:45-1:30": ["Español"],
+                        "1:45-2:30": ["Languaje"]
+                    },
+                    "Miercoles": {
+                        "7:00-7:45": ["Ingles"],
+                        "7:45-8:30": ["Historia"],
+                        "8:30-9:15": ["Español"],
+                        "9:15-10:00": ["Languaje"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Quimica"],
+                        "12:00-12:45": ["Fisica"],
+                        "12:45-1:30": ["Matematica"],
+                        "1:45-2:30": ["Keyboarding"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["Ingles"],
+                        "7:45-8:30": ["Sociologia"],
+                        "8:30-9:15": ["Matematicas"],
+                        "9:15-10:00": ["Quimica"],
+                        "10:30-11:15": ["Edu. Fisica"],
+                        "11:15-12:00": ["Languaje"],
+                        "12:00-12:45": ["Fisica"],
+                        "12:45-1:30": ["Biologia"],
+                        "1:45-2:30": ["Ingles"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Informatica"],
+                        "7:45-8:30": ["Psicologia"],
+                        "8:30-9:15": ["Languaje"],
+                        "9:15-10:00": ["Español"],
+                        "10:30-11:15": ["Historia"],
+                        "11:15-12:00": ["Ingles"],
+                        "12:00-12:45": ["Emprendimiento"],
+                        "12:45-1:30": ["Religion"],
+                        "1:45-2:30": ["matematica"]
+                    }
+                },
+                "11 AEB": {
+                    "Lunes": {
+                        "7:00-7:45": ["Legislacion"],
+                        "7:45-8:30": ["Admin. Docs"],
+                        "8:30-9:15": ["Matematica"],
+                        "9:15-10:00": ["Español"],
+                        "10:30-11:15": ["Apr. Artistica"],
+                        "11:15-12:00": ["Apr. Artistica"],
+                        "12:00-12:45": ["Phonics"],
+                        "12:45-1:30": ["Business English"],
+                        "1:45-2:30": ["Contabilidad"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Ofimatica"],
+                        "7:45-8:30": ["B. English"],
+                        "8:30-9:15": ["B. Comunication"],
+                        "9:15-10:00": ["Phonics"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Filosofia"],
+                        "12:00-12:45": ["Languaje WK"],
+                        "12:45-1:30": ["Keyboarding"],
+                        "1:45-2:30": ["Conv. English"]
+                    },
+                    "Miércoles": {
+                        "7:00-7:45": ["Admin- Docs"],
+                        "7:45-8:30": ["Contabilidad"],
+                        "8:30-9:15": ["B. Comunication"],
+                        "9:15-10:00": ["Gest. Empresarial"],
+                        "10:30-11:15": ["B. English"],
+                        "11:15-12:00": ["Religion"],
+                        "12:00-12:45": ["Phonics"],
+                        "12:45-1:30": ["Español"],
+                        "1:45-2:30": ["Matematica"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["Keyboarding"],
+                        "7:45-8:30": ["Matematica"],
+                        "8:30-9:15": ["B.Comunication"],
+                        "9:15-10:00": ["Languaje WK"],
+                        "10:30-11:15": ["Legislacion"],
+                        "11:15-12:00": ["Phonics"],
+                        "12:00-12:45": ["Filosofia"],
+                        "12:45-1:30": ["B. English"],
+                        "1:45-2:30": ["Conv. English"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Phonics"],
+                        "7:45-8:30": ["Conv. English"],
+                        "8:30-9:15": ["Religion"],
+                        "9:15-10:00": ["Languaje WK"],
+                        "10:30-11:15": ["Ofimatica"],
+                        "11:15-12:00": ["Español"],
+                        "12:00-12:45": ["B. Enlgish"],
+                        "12:45-1:30": ["Matematica"],
+                        "1:45-2:30": ["Gest. Empresaria"]
+                    }
+                },
+                "12 AEB A": {
+                    "Lunes": {
+                        "7:00-7:45": ["Languaje WK"],
+                        "7:45-8:30": ["Conv. English"],
+                        "8:30-9:15": ["Redacción"],
+                        "9:15-10:00": ["Event y Protoc."],
+                        "10:30-11:15": ["Trans. And Inter."],
+                        "11:15-12:00": ["Asis. Empresarial"],
+                        "12:00-12:45": ["Writting and Filling"],
+                        "12:45-1:30": ["World History"],
+                        "1:45-2:30": ["Ofimatica III"]
+                    },
+                    "Martes": {
+                        "7:00-7:45": ["Conv. English"],
+                        "7:45-8:30": ["Trans. And Inter."],
+                        "8:30-9:15": ["Religion"],
+                        "9:15-10:00": ["Awoc"],
+                        "10:30-11:15": ["Writting and Filling"],
+                        "11:15-12:00": ["Talento Humano"],
+                        "12:00-12:45": ["Matematica"],
+                        "12:45-1:30": ["Eval. De proyectos"],
+                        "1:45-2:30": ["Languaje WK"]
+                    },
+                    "Miércoles": {
+                        "7:00-7:45": ["Conv. English"],
+                        "7:45-8:30": ["Languaje WK"],
+                        "8:30-9:15": ["World History"],
+                        "9:15-10:00": ["Talento Humano"],
+                        "10:30-11:15": ["Trans. And Inter."],
+                        "11:15-12:00": ["Awoc"],
+                        "12:00-12:45": ["Writting and Filling"],
+                        "12:45-1:30": ["Ofimatica III"],
+                        "1:45-2:30": ["Redacción"]
+                    },
+                    "Jueves": {
+                        "7:00-7:45": ["AWOC"],
+                        "7:45-8:30": ["Event y Protoc."],
+                        "8:30-9:15": ["Religion"],
+                        "9:15-10:00": ["Trans. And Inter."],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Languaje WK"],
+                        "12:00-12:45": ["Conv. English"],
+                        "12:45-1:30": ["Matematica"],
+                        "1:45-2:30": ["TES"]
+                    },
+                    "Viernes": {
+                        "7:00-7:45": ["Redacción"],
+                        "7:45-8:30": ["Writting and Filling"],
+                        "8:30-9:15": ["AWOC"],
+                        "9:15-10:00": ["Event y Protoc."],
+                        "10:30-11:15": ["Eval. De proyectos"],
+                        "11:15-12:00": ["Ofimatica III"],
+                        "12:00-12:45": ["Conv. English"],
+                        "12:45-1:30": ["Asis. Empresarial"],
+                        "1:45-2:30": ["Talento Humano"]
+                    }
+                },
+                "12 AEB B": {
+                    "lunes": {
+                        "7:00-7:45": ["MATE"],
+                        "7:45-8:30": ["LANGUAJE W"],
+                        "8:30-9:15": ["ORGANIACION DE E"],
+                        "9:15-10:00": ["APPLIED o. and w."],
+                        "10:30-11:15": ["REDACCION"],
+                        "11:15-12:00": ["BUS WRITTING HUNG"],
+                        "12:00-12:45": ["Form. Y Evalu. De P"],
+                        "12:45-1:30": ["CON. E. WORKSHOP"],
+                        "1:45-2:30": ["GESTION DE TTHH"]
+                    },
+                    "ma rtes": {
+                        "7:00-7:45": ["LANGUAJE W"],
+                        "7:45-8:30": ["GESTION DE"],
+                        "8:30-9:15": ["APPLIED O. AND W."],
+                        "9:15-10:00": ["cob E. WORKSHOP"],
+                        "10:30-11:15": ["OFIMATICA"],
+                        "11:15-12:00": ["Asis. Empresarial"],
+                        "12:00-12:45": ["ORGANIACION DE E"],
+                        "12:45-1:30": ["TRANSLATION AND INT"],
+                        "1:45-2:30": ["Religion"]
+                    },
+                    "miercoles": {
+                        "7:00-7:45": ["Bus. Writting filling"],
+                        "7:45-8:30": ["OFIMATCA"],
+                        "8:30-9:15": ["LANGUAJE W"],
+                        "9:15-10:00": ["WORLD HISTORY"],
+                        "10:30-11:15": ["Form. Y Evalu. De P"],
+                        "11:15-12:00": ["REDACCION"],
+                        "12:00-12:45": ["TRANSLATION AND NT."],
+                        "12:45-1:30": ["Con. E. Workshop"],
+                        "1:45-2:30": ["Applied O. And W."]
+                    },
+                    "jueves": {
+                        "7:00-7:45": ["GESTION de TTHH"],
+                        "7:45-8:30": ["Bus. WRITTING HUNG"],
+                        "8:30-9:15": ["Con. E. Workshop"],
+                        "9:15-10:00": ["Asis. Empresarial"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["TRANSLATION"],
+                        "12:00-12:45": ["Bus. WRITTING HUNG"],
+                        "12:45-1:30": ["TES"],
+                        "1:45-2:30": ["RELIGION"]
+                    },
+                    "viernes": {
+                        "7:00-7:45": ["Bus. Writting filling"],
+                        "7:45-8:30": ["WORLD HISTORY"],
+                        "8:30-9:15": ["TRANSLATION AND INT."],
+                        "9:15-10:00": ["MATE"],
+                        "10:30-11:15": ["Con. E. Workshop"],
+                        "11:15-12:00": ["LANGUAJE W"],
+                        "12:00-12:45": ["Form. Y Evalu. De P"],
+                        "12:45-1:30": ["Ofimatica"],
+                        "1:45-2:30": ["REDACCION"]
+                    }
+                },
+                "10 INFO": {
+                    "lunes": {
+                        "7:00-7:45": ["Informatica"],
+                        "7:45-8:30": ["Edu. Fisica"],
+                        "8:30-9:15": ["Matemáticas"],
+                        "9:15-10:00": ["Sociologia"],
+                        "10:30-11:15": ["Quimica"],
+                        "11:15-12:00": ["Psicología"],
+                        "12:00-12:45": ["Ingles"],
+                        "12:45-1:30": ["Fisica"]
+                    },
+                    "ma rtes": {
+                        "7:00-7:45": ["Historia de Honduras"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Matemáticas"],
+                        "9:15-10:00": ["Informatica"],
+                        "10:30-11:15": ["Religión"],
+                        "11:15-12:00": ["Fisica"],
+                        "12:00-12:45": ["Quimica"],
+                        "12:45-1:30": ["Biología"]
+                    },
+                    "miercoles": {
+                        "7:00-7:45": ["Quimica"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Ingles"],
+                        "9:15-10:00": ["Fisica"],
+                        "10:30-11:15": ["Tuto ria"],
+                        "11:15-12:00": ["Matemáticas"],
+                        "12:00-12:45": ["Informatica"],
+                        "12:45-1:30": ["Biología"]
+                    },
+                    "jueves": {
+                        "7:00-7:45": ["Sociología"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Biología"],
+                        "9:15-10:00": ["Fisica"],
+                        "10:30-11:15": ["Quimica"],
+                        "11:15-12:00": ["Historia de Honduras"],
+                        "12:00-12:45": ["Inglés"],
+                        "12:45-1:30": ["Matemáticas"]
+                    },
+                    "viernes": {
+                        "7:00-7:45": ["Matemáticas"],
+                        "7:45-8:30": ["Español"],
+                        "8:30-9:15": ["Religión"],
+                        "9:15-10:00": ["Fisica"],
+                        "10:30-11:15": ["Biología"],
+                        "11:15-12:00": ["Informatica"],
+                        "12:00-12:45": ["Psicología"],
+                        "12:45-1:30": ["Quimica"]
+                    }
+                },
+                "11 INFO": {
+                    "LUNES": {
+                        "7:00-7:45": ["Informática"],
+                        "7:45-8:30": ["Ofimática"],
+                        "8:30-9:15": ["Apreciación Artistica"],
+                        "9:15-10:00": ["Apreciadón Artistica Español"],
+                        "10:30-11:15": ["Matemática"],
+                        "11:15-12:00": ["Física"],
+                        "12:00-12:45": ["Análisis y Diseño"],
+                        "12:45-1:30": ["Lab. Programación"]
+                    },
+                    "MARTES": {
+                        "7:00-7:45": ["Matemáticas"],
+                        "7:45-8:30": ["Programación"],
+                        "8:30-9:15": ["Análisis y Diseño"],
+                        "9:15-10:00": ["Español"],
+                        "10:30-11:15": ["Tutoría"],
+                        "11:15-12:00": ["Ofimática"],
+                        "12:00-12:45": ["Ofimática"],
+                        "12:45-1:30": ["Fisica"]
+                    },
+                    "MIÉRCOLES": {
+                        "7:00-7:45": ["Ofimática"],
+                        "7:45-8:30": ["Programación"],
+                        "8:30-9:15": ["Legislación"],
+                        "9:15-10:00": ["Ofimática"],
+                        "10:30-11:15": ["Filosofía"],
+                        "11:15-12:00": ["Informática"],
+                        "12:00-12:45": ["Religión"],
+                        "12:45-1:30": ["Inglés écnico"]
+                    },
+                    "JUEVES": {
+                        "7:00-7:45": ["Análisis y Diseño"],
+                        "7:45-8:30": ["Ofimática"],
+                        "8:30-9:15": ["Fisica"],
+                        "9:15-10:00": ["Programación"],
+                        "10:30-11:15": ["Matemática"],
+                        "11:15-12:00": ["Lab. Programación"],
+                        "12:00-12:45": ["Informática"],
+                        "12:45-1:30": ["Español"]
+                    },
+                    "VIERNES": {
+                        "7:00-7:45": ["Legislación"],
+                        "7:45-8:30": ["Matemática"],
+                        "8:30-9:15": ["Español"],
+                        "9:15-10:00": ["Ingles Técnico"],
+                        "10:30-11:15": ["Religión"],
+                        "11:15-12:00": ["Filosofía"],
+                        "12:00-12:45": ["Ofimática"],
+                        "12:45-1:30": ["Programación"]
+                    }
+                },
+                "12 INFO": {
+                    "LUNES": {
+                        "7:00-7:45": ["Redes"],
+                        "7:45-8:30": ["Programación"],
+                        "8:30-9:15": ["Programación"],
+                        "9:15-10:00": ["Desarrollo web"],
+                        "10:30-11:15": ["Producción D."],
+                        "11:15-12:00": ["Lab. Progra"],
+                        "12:00-12:45": ["Mantenimiento"],
+                        "12:45-1:30": ["Matematica"]
+                    },
+                    "MARTES": {
+                        "7:00-7:45": ["Ges. Empresarial"],
+                        "7:45-8:30": ["Religion"],
+                        "8:30-9:15": ["Producción D."],
+                        "9:15-10:00": ["Redes"],
+                        "10:30-11:15": ["Programación"],
+                        "11:15-12:00": ["Desarrollo web"],
+                        "12:00-12:45": ["TES practico"],
+                        "12:45-1:30": ["Matematica"]
+                    },
+                    "MIÉRCOLES": {
+                        "7:00-7:45": ["Desarrollo web"],
+                        "7:45-8:30": ["Producción D."],
+                        "8:30-9:15": ["Producción D."],
+                        "9:15-10:00": ["Ges. Empresarial"],
+                        "10:30-11:15": ["Desarrollo web"],
+                        "11:15-12:00": ["Mantenimiento"],
+                        "12:00-12:45": ["Programación"],
+                        "12:45-1:30": ["Redes"]
+                    },
+                    "JUEVES": {
+                        "7:00-7:45": ["Redes"],
+                        "7:45-8:30": ["Matematica"],
+                        "8:30-9:15": ["Producción D."],
+                        "9:15-10:00": ["Lab. Progra"],
+                        "10:30-11:15": ["Tutoria"],
+                        "11:15-12:00": ["Desarrollo web"],
+                        "12:00-12:45": ["Programación"],
+                        "12:45-1:30": ["Mantenimiento"]
+                    },
+                    "VIERNES": {
+                        "7:00-7:45": ["Desarrollo web(Lab)"],
+                        "7:45-8:30": ["Producción D."],
+                        "8:30-9:15": ["Desarrollo web"],
+                        "9:15-10:00": ["Religion"],
+                        "10:30-11:15": ["Redes"],
+                        "11:15-12:00": ["Programación"],
+                        "12:00-12:45": ["Mantenimiento"],
+                        "12:45-1:30": [""]
+                    }
+                }
+            };
+  
+    let conversationHistory = [];
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+    }
+
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = `avatar ${isUser ? 'user-avatar' : 'ai-avatar'}`;
+
+        const avatarIcon = document.createElement('i');
+        avatarIcon.className = isUser ? 'fas fa-user' : 'fas fa-robot';
+        avatarDiv.appendChild(avatarIcon);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+
+        const paragraph = document.createElement('p');
+        paragraph.textContent = content;
+        contentDiv.appendChild(paragraph);
+
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        timestamp.textContent = getCurrentTime();
+        contentDiv.appendChild(timestamp);
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+
+        chatMessages.appendChild(messageDiv);
+
+        conversationHistory.push({
+            role: isUser ? "user" : "model",
+            content: content
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai-message';
+        messageDiv.id = 'typing-indicator';
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'avatar ai-avatar';
+
+        const avatarIcon = document.createElement('i');
+        avatarIcon.className = 'fas fa-robot';
+        avatarDiv.appendChild(avatarIcon);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'typing-dot';
+            typingDiv.appendChild(dot);
+        }
+
+        contentDiv.appendChild(typingDiv);
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    function processHorarioQuery(userMessage) {
+        const lowerMessage = userMessage.toLowerCase();
+        
+        // Detectar solicitud de horario completo
+        if (lowerMessage.includes("horario completo") || lowerMessage.includes("horario de clases")) {
+            const match = userMessage.match(/10 BCH|11 BCH|10 AEB A|10 AEB B|11 AEB|12 AEB A|12 AEB B|10 INFO|11 INFO|12 INFO/i);
+            if (match) {
+                const grado = match[0];
+                return getHorarioCompleto(grado);
+            } else {
+                return "Por favor, especifica de qué grado quieres ver el horario completo (ejemplo: 'horario completo de 10 BCH').";
+            }
+        }
+        
+        // Detectar solicitud de horario por día
+        if (lowerMessage.includes("horario del") || lowerMessage.includes("horario para el")) {
+            const matchDia = userMessage.match(/lunes|martes|miércoles|jueves|viernes/i);
+            const matchGrado = userMessage.match(/10 BCH|11 BCH|10 AEB A|10 AEB B|11 AEB|12 AEB A|12 AEB B|10 INFO|11 INFO|12 INFO/i);
+            
+            if (matchDia && matchGrado) {
+                const dia = capitalizeFirstLetter(matchDia[0].toLowerCase());
+                const grado = matchGrado[0];
+                return getHorarioPorDia(grado, dia);
+            } else {
+                return "Por favor, especifica el día y el grado (ejemplo: 'horario del lunes para 10 BCH').";
+            }
+        }
+        
+        // Detectar solicitud de qué clase hay en un horario específico
+        if (lowerMessage.includes("qué clase hay") || lowerMessage.includes("qué hay a las")) {
+            const matchHora = userMessage.match(/\d{1,2}:\d{2}/);
+            const matchDia = userMessage.match(/lunes|martes|miércoles|jueves|viernes/i);
+            const matchGrado = userMessage.match(/10 BCH|11 BCH|10 AEB A|10 AEB B|11 AEB|12 AEB A|12 AEB B|10 INFO|11 INFO|12 INFO/i);
+            
+            if (matchHora && matchDia && matchGrado) {
+                const hora = matchHora[0];
+                const dia = capitalizeFirstLetter(matchDia[0].toLowerCase());
+                const grado = matchGrado[0];
+                return getClaseEnHora(grado, dia, hora);
+            } else {
+                return "Por favor, especifica la hora, el día y el grado (ejemplo: 'qué clase hay a las 10:30 el lunes para 10 BCH').";
+            }
+        }
+        
+        // Detectar solicitud de cuándo es una clase específica
+        if (lowerMessage.includes("cuándo es") || lowerMessage.includes("dónde está")) {
+            const matchClase = userMessage.match(/religion|inglés|física|psicología|biología|sociología|matemáticas|química|español|informática|historia|ed. física|tutoría/i);
+            const matchGrado = userMessage.match(/10 BCH|11 BCH|10 AEB A|10 AEB B|11 AEB|12 AEB A|12 AEB B|10 INFO|11 INFO|12 INFO/i);
+            
+            if (matchClase && matchGrado) {
+                const clase = matchClase[0];
+                const grado = matchGrado[0];
+                return getHorarioDeClase(grado, clase);
+            } else {
+                return "Por favor, especifica la clase y el grado (ejemplo: 'cuándo es matemáticas en 10 BCH').";
+            }
+        }
+        
+        return null;
+    }
+
+    function getHorarioCompleto(grado) {
+        if (!horarios[grado]) {
+            return `No tengo información sobre el horario de ${grado}.`;
+        }
+        
+        let respuesta = `Horario completo para ${grado}:\n\n`;
+        
+        for (const dia in horarios[grado]) {
+            respuesta += `${dia}:\n`;
+            for (const hora in horarios[grado][dia]) {
+                respuesta += `${hora}: ${horarios[grado][dia][hora].join(", ")}\n`;
+            }
+            respuesta += "\n";
+        }
+        
+        return respuesta;
+    }
+
+    function getHorarioPorDia(grado, dia) {
+        if (!horarios[grado]) {
+            return `No tengo información sobre el horario de ${grado}.`;
+        }
+        
+        if (!horarios[grado][dia]) {
+            return `No tengo información para el día ${dia} en ${grado}.`;
+        }
+        
+        let respuesta = `Horario de ${dia} para ${grado}:\n\n`;
+        
+        for (const hora in horarios[grado][dia]) {
+            respuesta += `${hora}: ${horarios[grado][dia][hora].join(", ")}\n`;
+        }
+        
+        return respuesta;
+    }
+
+    function getClaseEnHora(grado, dia, horaInput) {
+        if (!horarios[grado]) {
+            return `No tengo información sobre el horario de ${grado}.`;
+        }
+        
+        if (!horarios[grado][dia]) {
+            return `No tengo información para el día ${dia} en ${grado}.`;
+        }
+        
+        // Convertir la hora de entrada a formato de 24 horas para comparación
+        const [h, m] = horaInput.split(':').map(Number);
+        const hora24 = `${h}:${m.toString().padStart(2, '0')}`;
+        
+        // Buscar el bloque de tiempo que contiene la hora especificada
+        for (const bloque in horarios[grado][dia]) {
+            const [inicio, fin] = bloque.split('-');
+            if (horaEnRango(hora24, inicio, fin)) {
+                return `A ${horaInput} del ${dia}, ${grado} tiene: ${horarios[grado][dia][bloque].join(", ")}`;
+            }
+        }
+        
+        return `No hay clases programadas a las ${horaInput} del ${dia} para ${grado}.`;
+    }
+
+    function getHorarioDeClase(grado, clase) {
+        if (!horarios[grado]) {
+            return `No tengo información sobre el horario de ${grado}.`;
+        }
+        
+        let respuesta = `Horario de ${clase} para ${grado}:\n\n`;
+        let encontrada = false;
+        
+        for (const dia in horarios[grado]) {
+            for (const hora in horarios[grado][dia]) {
+                if (horarios[grado][dia][hora].some(c => c.toLowerCase().includes(clase.toLowerCase()))) {
+                    respuesta += `${dia} ${hora}\n`;
+                    encontrada = true;
                 }
             }
+        }
+        
+        if (!encontrada) {
+            return `No se encontró ${clase} en el horario de ${grado}.`;
+        }
+        
+        return respuesta;
+    }
 
-            sendButton.addEventListener('click', handleUserInput);
+    // Funciones auxiliares
+    function horaEnRango(hora, inicio, fin) {
+        const [h, m] = hora.split(':').map(Number);
+        const [hi, mi] = inicio.split(':').map(Number);
+        const [hf, mf] = fin.split(':').map(Number);
+        
+        const minutos = h * 60 + m;
+        const minutosInicio = hi * 60 + mi;
+        const minutosFin = hf * 60 + mf;
+        
+        return minutos >= minutosInicio && minutos < minutosFin;
+    }
 
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleUserInput();
-                }
-            });
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 
-            document.querySelector('.fa-trash-alt').parentElement.addEventListener('click', function() {
-                while (chatMessages.children.length > 1) {
-                    chatMessages.removeChild(chatMessages.lastChild);
-                }
-                conversationHistory = [];
-            });
+    async function handleUserInput() {
+        const userMessage = userInput.value.trim();
 
-            userInput.focus();
+        if (userMessage === '') return;
+
+        addMessage(userMessage, true);
+        userInput.value = '';
+        showTypingIndicator();
+
+        try {
+            // Primero intentamos procesar la pregunta sobre horarios
+            const horarioResponse = processHorarioQuery(userMessage);
+            
+            if (horarioResponse) {
+                hideTypingIndicator();
+                addMessage(horarioResponse, false);
+            } else {
+                // Si no es una pregunta sobre horarios, usamos la API de Gemini
+                const aiResponse = await callGeminiAPI(userMessage);
+                hideTypingIndicator();
+                addMessage(aiResponse, false);
+            }
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage("Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.", false);
+            console.error("Error:", error);
+        }
+    }
+
+    // ... (resto de las funciones como callGeminiAPI y los event listeners)
+    // Nota: Mantén las funciones callGeminiAPI, los event listeners y el resto del código como estaba
+
+    sendButton.addEventListener('click', handleUserInput);
+
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleUserInput();
+        }
+    });
+
+    suggestions.forEach(chip => {
+        chip.addEventListener('click', function() {
+            userInput.value = this.textContent;
+            handleUserInput();
         });
-    </script>
+    });
+
+    document.querySelector('.fa-trash-alt').parentElement.addEventListener('click', function() {
+        while (chatMessages.children.length > 1) {
+            chatMessages.removeChild(chatMessages.lastChild);
+        }
+        conversationHistory = [];
+    });
+
+    userInput.focus();
+});
+        
+    </scrip>
+
+
+    
 </body>
 </html>
